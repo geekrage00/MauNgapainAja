@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -52,9 +53,20 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // 7.1 Buat onItemLongClickListener di list view untuk hapus data
+        lvTodos.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                //panggil method deleteItem()
+
+                deleteItem(position);
+                return false;
+            }
+        });
+
     }
 
-    // 1. Siapkan Data
+    // 1. Siapkan Dummy Data
     private void createTodos(){
         data.add("Coding");
         data.add("Eat");
@@ -77,15 +89,39 @@ public class MainActivity extends AppCompatActivity {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setTitle("Mau ngapain lagi nich?");
         dialog.setView(view);
-        dialog.setPositiveButton("Add", new DialogInterface.OnClickListener() {
+        dialog.setPositiveButton("Tambah", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 data.add(edtTodo.getText().toString()); // tambah data ke object ArrayList data.
                 arrayAdapter.notifyDataSetChanged(); // merefresh list view
             }
         });
-        dialog.setNegativeButton("Cancel",null);
+        dialog.setNegativeButton("Batal",null);
         dialog.create();
         dialog.show();
+    }
+
+
+    // 7.2 Buat method delete Item untuk menghapus data dari array list dan mengupdate list view
+    private void deleteItem(int position){ // beri parameter position untuk mewadahi position dari list view
+        // konstanta untuk menampung data position yang di passing dari onItemLongClickListener
+        final int index = position;
+
+        //Buat alert dialog
+        AlertDialog.Builder dialog  = new AlertDialog.Builder(this);
+        dialog.setTitle("Yakin akan dihapus ?");
+        dialog.setPositiveButton("Ya", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //hapus item dari array list data berdasarkan index/position dari item di list view
+                data.remove(index); // index didapat position parameter
+                //suruh adapter untuk notify  ke List View kalau data telah berubah //merefresh list view
+                arrayAdapter.notifyDataSetChanged();
+            }
+        });
+        dialog.setNegativeButton("Tidak",null);
+        dialog.create().show();
+
+
     }
 }
