@@ -4,12 +4,14 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -31,10 +33,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //1. Siapkan data
-        createTodos();
+        //createTodos();
+
+        // 9.2 Panggil method loadDataFromPreferences() agar data dari SP dimasukkan ke array list saat activity pertama dipanggil
+        loadDataFromPreferences();
 
         //2. Buat List View
         lvTodos = findViewById(R.id.lv_todos); // define list view
+
+
 
         // 3. Buat Adapter dan masukkan parameter yg dibutuhkan. (context, layout_content,tv,data)
         //      parameter data diambil dari langkah 1.
@@ -92,8 +99,18 @@ public class MainActivity extends AppCompatActivity {
         dialog.setPositiveButton("Tambah", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                data.add(edtTodo.getText().toString()); // tambah data ke object ArrayList data.
+                // 8.2 hitung size dari arraylist data untuk dijadikan calon key untuk SP :
+                int newKey= data.size();
+
+                String item = edtTodo.getText().toString();
+                data.add(item); // tambah data ke object ArrayList data.
                 arrayAdapter.notifyDataSetChanged(); // merefresh list view
+
+                // 8.3 Tambahkan data ke Shared Preferences
+                // Panggil method addToSP() untuk menyimpan data ke SP
+                addToSP(newKey,item);
+
+                Toast.makeText(getApplicationContext(),String.valueOf(newKey),Toast.LENGTH_LONG).show();
             }
         });
         dialog.setNegativeButton("Batal",null);
@@ -121,7 +138,35 @@ public class MainActivity extends AppCompatActivity {
         });
         dialog.setNegativeButton("Tidak",null);
         dialog.create().show();
+    }
 
+    //8.1 Buat method untuk input data ke Shared Preferences
+    private void addToSP(int key, String item){
+        // buat key untuk SP diambil dari size terakhir array list data
+        String newKey = String.valueOf(key);
+        SharedPreferences todosPref = getSharedPreferences("todosPref",MODE_PRIVATE);
+        SharedPreferences.Editor todosPrefEditor = todosPref.edit();
+        // simpan ke SP dengan key dari size terakhir array list
+        todosPrefEditor.putString(newKey,item);
+        todosPrefEditor.apply();
+        // atau:
+        // todosPrefEditor.commit();
+    }
+
+    // 9.1 Load Data dari Shared Preferences
+    // Buat method loadPreferences
+    private void loadDataFromPreferences(){
+        SharedPreferences todosPref = getSharedPreferences("todosPref",MODE_PRIVATE);
+        //cek dalam SP ada data atau tidak
+        if(todosPref.getAll().size() > 0) {
+            //masukkan semua data di SP ke array list data
+            for (int i = 0; i < todosPref.getAll().size(); i++) {
+                String key = String.valueOf(i);
+                String item = todosPref.getString(key, null);
+                data.add(item);
+            }
+        }
 
     }
+
 }
