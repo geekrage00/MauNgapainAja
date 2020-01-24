@@ -74,9 +74,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // 12.4 Buat OnItemClickListener dan panggil method showDialogEdit()
         lvTodos.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Panggil method showDialogEdit()
                 showDialogEdit(position);
             }
         });
